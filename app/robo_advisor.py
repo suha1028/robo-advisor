@@ -1,5 +1,8 @@
 import requests 
+
 import json
+import csv 
+import os
 
 def to_usd(my_price):
     """
@@ -15,27 +18,37 @@ def to_usd(my_price):
 request_url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo"
 
 response = requests.get(request_url)
-#print(type(response))
-#print(response.status_code)
-#print(response.text)
 
 parsed_response = json.loads(response.text)
 
+#latest day
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
+#latest closing price 
 tsd = parsed_response["Time Series (Daily)"]
 dates = list(tsd.keys()) #assumes latest day is on top
 latest_day = dates[0]
 latest_close = tsd[latest_day]["4. close"]
 
-#get high proce from each day
+#get high price from each day
 high_prices = []
 for date in dates:
     high_price = tsd[date]["2. high"]
-    high_prices.append(high_price)
+    high_prices.append(float(high_price))
 
 #maximum of high prices
 recent_high = max(high_prices)
+
+#get low price from each day
+low_prices = []
+for date in dates:
+    low_price = tsd[date]["3. low"]
+    low_prices.append(float(low_price))
+
+#min of low prices
+recent_low = min(low_prices)
+
+csv_file_path = os.path.join(os.path.dirname(__file__), "...", "data", "prices.csv")
 
 
 print("-------------------------")
@@ -47,10 +60,13 @@ print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print(f"RECENT HIGH: {to_usd(float(recent_high))}")
-print("RECENT LOW: $99,000.00")
+print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
 print("RECOMMENDATION: BUY!")
 print("RECOMMENDATION REASON: TODO")
 print("-------------------------")
+print(f"WRITING DATA TO CSV: {csv_file_path}")
+print("-------------------------")
 print("HAPPY INVESTING!")
 print("-------------------------")
+
