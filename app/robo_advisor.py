@@ -9,7 +9,7 @@ def to_usd(my_price):
     Returns: $4,000.44
     """
     return f"${my_price:,.2f}" #> $12,000.71
-    
+
 #info inputs 
 
 request_url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo"
@@ -23,8 +23,10 @@ parsed_response = json.loads(response.text)
 
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
-#tsd = parsed_response["Time Series (Daily)"]
-latest_close = parsed_response["Time Series (Daily)"]["2021-03-05"]["4. close"]
+tsd = parsed_response["Time Series (Daily)"]
+dates = list(tsd.keys()) #assumes latest day is on top
+latest_day = days[0]
+latest_close = tsd[latest_day]["4. close"]
 
 
 
