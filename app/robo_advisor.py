@@ -1,3 +1,4 @@
+#collaborated with Patrick Lazzaro on this project
 import requests 
 from dotenv import load_dotenv
 
@@ -16,15 +17,28 @@ def to_usd(my_price):
     """
     return f"${my_price:,.2f}" #> $12,000.71
 
-#info inputs 
+#user inputs and validation
+def hasNumbers(inputString):
+    return any(char.isdigit() for char in inputString)
+while True:
+    symbol = input("HELLO! PLEASE ENTER A STOCK SYMBOL/TICKER (ex. AAPL):")
+
+    if (hasNumbers(symbol) == True) or (len(symbol) >5) or (len(symbol) <1):
+        print("OOPS, please choose a valid stock symbol and try again!")
+    else:
+        break
+
+#API key
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
-symbol = "MSFT"
 request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}"
-
 response = requests.get(request_url)
-
 parsed_response = json.loads(response.text)
 
+#post get request validation
+if "Error Message" in response.text:
+    print("Sorry, couldn't find any trading data for that stock symbol. Please try again!")
+    exit()
+    
 #latest day
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
