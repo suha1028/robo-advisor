@@ -38,7 +38,7 @@ parsed_response = json.loads(response.text)
 if "Error Message" in response.text:
     print("Sorry, couldn't find any trading data for that stock symbol. Please try again!")
     exit()
-    
+
 #latest day
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
@@ -66,6 +66,7 @@ for date in dates:
 #min of low prices
 recent_low = min(low_prices)
 
+#csv data 
 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "data", "prices.csv")
 csv_headers = ["timestamp", "open", "high", "low", "close", "volume"]
 with open(csv_file_path, "w") as csv_file:
@@ -86,16 +87,41 @@ print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
 print("-------------------------")
 print("REQUESTING STOCK MARKET DATA...")
-print("REQUEST AT: 2018-02-20 02:00pm")
+
+#request time
+import datetime
+now = datetime.datetime.now()
+print("REQUEST AT: " + str(now.strftime("%Y-%m-%d %I:%M %p")))
+
+#latest day, close, high, low
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print(f"RECENT HIGH: {to_usd(float(recent_high))}")
 print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
-print("RECOMMENDATION: BUY!")
-print("RECOMMENDATION REASON: TODO")
+
+#recommendation
+if (float(latest_close) >= (recent_high* .90)):
+    recommendation = "STRONG BUY"
+    reason = "The stock price is within 10% of its recent high."
+elif (float(latest_close) >= (recent_high* .80)) & (float(latest_close) < (recent_high* .90)):
+    recommendation = "BUY"
+    reason = "The stock price is within 10-20% of its recent high."
+elif (float(latest_close) >= (recent_high* .65)) & (float(latest_close) < (recent_high* .80)):
+    recommendation = "HOLD"
+    reason = "The stock price is within 20-35% of its recent high."
+elif (float(latest_close) >= (recent_high* .50)) & (float(latest_close) < (recent_high* .65)):
+    recommendation = "SELL"
+    reason = "The stock price is within 35-50% of its recent high. Unless you beleive the stock is undervalued, I would not invest."
+else:
+    recommendation = "STRONG SELL"
+    reason = "The stock is below 50% of its recent high. Unless you beleive the stock is undervalued, I would not invest."
+print(f"RECOMMENDATION: {recommendation}")
+print(f"RECOMMENDATION REASON: {reason}")
 print("-------------------------")
+
+#csv and ending message
 print(f"WRITING DATA TO CSV: {csv_file_path}")
 print("-------------------------")
 print("HAPPY INVESTING!")
